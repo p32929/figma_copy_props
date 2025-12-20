@@ -2,7 +2,7 @@
 
 A Figma plugin that allows you to selectively copy element properties in a clean, readable format.
 
-![Screenshot Placeholder](./screenshot.png)
+![Screenshot](https://res.cloudinary.com/p32929/image/upload/v1766252551/figma_copy_props/Screenshot_2025-12-20_at_9.23.31_PM_syrwmp.png)
 
 ## Features
 
