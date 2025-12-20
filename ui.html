@@ -50,13 +50,6 @@
       height: 20px;
     }
 
-    #message {
-      color: #999;
-      text-align: center;
-      padding: 40px 20px;
-      font-size: 13px;
-    }
-
     .controls {
       display: flex;
       gap: 8px;
@@ -97,13 +90,6 @@
       background: #E5E5E5;
       color: #999;
       cursor: not-allowed;
-    }
-
-    #content {
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-      min-height: 0;
     }
 
     .table-container {
@@ -191,10 +177,6 @@
       margin: 0;
     }
 
-    .hidden {
-      display: none;
-    }
-
     .select-controls {
       display: flex;
       gap: 8px;
@@ -253,32 +235,28 @@
     </a>
   </div>
 
-  <div id="message">Select an element to view its properties</div>
+  <div class="controls">
+    <button id="copy-btn">Copy Selected Properties</button>
+  </div>
 
-  <div id="content" class="hidden">
-    <div class="controls">
-      <button id="copy-btn">Copy Selected Properties</button>
-    </div>
+  <div class="select-controls">
+    <a id="select-all">Select All</a>
+    <span>|</span>
+    <a id="deselect-all">Deselect All</a>
+  </div>
 
-    <div class="select-controls">
-      <a id="select-all">Select All</a>
-      <span>|</span>
-      <a id="deselect-all">Deselect All</a>
-    </div>
-
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th></th>
-            <th>Property</th>
-            <th>Value</th>
-          </tr>
-        </thead>
-        <tbody id="properties-table">
-        </tbody>
-      </table>
-    </div>
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th></th>
+          <th>Property</th>
+          <th>Value</th>
+        </tr>
+      </thead>
+      <tbody id="properties-table">
+      </tbody>
+    </table>
   </div>
 
   <div id="toast" class="toast"></div>
@@ -399,9 +377,6 @@
         tr.appendChild(tdValue);
         tbody.appendChild(tr);
       }
-
-      document.getElementById('message').classList.add('hidden');
-      document.getElementById('content').classList.remove('hidden');
     }
 
     // Show toast notification
@@ -609,14 +584,12 @@
 
       if (msg.type === 'selection-changed') {
         displayProperties(msg.properties);
-      } else if (msg.type === 'no-selection') {
-        document.getElementById('message').textContent = 'Select an element to view its properties';
-        document.getElementById('message').classList.remove('hidden');
-        document.getElementById('content').classList.add('hidden');
-      } else if (msg.type === 'multiple-selection') {
-        document.getElementById('message').textContent = `${msg.count} elements selected. Please select only one element.`;
-        document.getElementById('message').classList.remove('hidden');
-        document.getElementById('content').classList.add('hidden');
+        document.getElementById('copy-btn').disabled = false;
+      } else if (msg.type === 'no-selection' || msg.type === 'multiple-selection') {
+        // Just clear table and disable button
+        const tbody = document.getElementById('properties-table');
+        tbody.innerHTML = '';
+        document.getElementById('copy-btn').disabled = true;
       }
     };
 
