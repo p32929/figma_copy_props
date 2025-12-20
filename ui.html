@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      padding: 16px;
+      background: #ffffff;
+      font-size: 12px;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    h2 {
+      font-size: 14px;
+      font-weight: 600;
+      margin: 0;
+      color: #000;
+    }
+
+    .github-link {
+      display: flex;
+      align-items: center;
+      color: #333;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+
+    .github-link:hover {
+      opacity: 0.7;
+    }
+
+    .github-link svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    #message {
+      color: #999;
+      text-align: center;
+      padding: 40px 20px;
+      font-size: 13px;
+    }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    button {
+      flex: 1;
+      padding: 8px 12px;
+      background: #18A0FB;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background: #0D8FE8;
+    }
+
+    button:active {
+      background: #0B7FD1;
+    }
+
+    button.secondary {
+      background: #F0F0F0;
+      color: #333;
+    }
+
+    button.secondary:hover {
+      background: #E5E5E5;
+    }
+
+    button:disabled {
+      background: #E5E5E5;
+      color: #999;
+      cursor: not-allowed;
+    }
+
+    #content {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .table-container {
+      border: 1px solid #E5E5E5;
+      border-radius: 6px;
+      overflow-y: auto;
+      flex: 1;
+      min-height: 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      background: #F9F9F9;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    th {
+      text-align: left;
+      padding: 10px 12px;
+      font-weight: 600;
+      font-size: 11px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid #E5E5E5;
+    }
+
+    th:first-child {
+      width: 40px;
+    }
+
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #F0F0F0;
+      vertical-align: middle;
+    }
+
+    tbody tr:hover {
+      background: #F9FBFF;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr.unchecked {
+      opacity: 0.4;
+    }
+
+    tbody tr.unchecked .property-name,
+    tbody tr.unchecked .property-value {
+      text-decoration: line-through;
+      color: #999;
+    }
+
+    .property-name {
+      font-weight: 500;
+      color: #333;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+
+    .property-value {
+      color: #666;
+      font-size: 12px;
+      word-break: break-all;
+      max-width: 200px;
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    input[type="checkbox"] {
+      cursor: pointer;
+      width: 16px;
+      height: 16px;
+      margin: 0;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .select-controls {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 11px;
+    }
+
+    .select-controls a {
+      color: #18A0FB;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .select-controls a:hover {
+      text-decoration: underline;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #18A0FB;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+
+    .toast.error {
+      background: #F24822;
+    }
+
+    .toast.success {
+      background: #0ACF83;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h2>Copy Properties</h2>
+    <a href="https://github.com/p32929/figma_copy_props" target="_blank" class="github-link" title="View on GitHub">
+      <svg viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+      </svg>
+    </a>
+  </div>
+
+  <div id="message">Select an element to view its properties</div>
+
+  <div id="content" class="hidden">
+    <div class="controls">
+      <button id="copy-btn">Copy Selected Properties</button>
+    </div>
+
+    <div class="select-controls">
+      <a id="select-all">Select All</a>
+      <span>|</span>
+      <a id="deselect-all">Deselect All</a>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Property</th>
+            <th>Value</th>
+          </tr>
+        </thead>
+        <tbody id="properties-table">
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const STORAGE_KEY = 'figma-copy-props-preferences';
+    let currentProperties = {};
+    let preferences = {};
+
+    // Load preferences from localStorage
+    function loadPreferences() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          preferences = JSON.parse(saved);
+        }
+      } catch (e) {
+        console.error('Error loading preferences:', e);
+        preferences = {};
+      }
+    }
+
+    // Save preferences to localStorage
+    function savePreferences() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(preferences));
+      } catch (e) {
+        console.error('Error saving preferences:', e);
+      }
+    }
+
+    // Get checkbox state for a property (default to checked if not set)
+    function getPreference(propertyName) {
+      return preferences.hasOwnProperty(propertyName) ? preferences[propertyName] : true;
+    }
+
+    // Set checkbox state for a property
+    function setPreference(propertyName, checked) {
+      preferences[propertyName] = checked;
+      savePreferences();
+    }
+
+    // Format value for table display
+    function formatValueForDisplay(value) {
+      // Try to parse JSON strings
+      if (typeof value === 'string' && (value.startsWith('{') || value.startsWith('['))) {
+        try {
+          value = JSON.parse(value);
+        } catch (e) {
+          return value;
+        }
+      }
+
+      // Handle objects and arrays - show compact representation
+      if (typeof value === 'object' && value !== null) {
+        if (Array.isArray(value)) {
+          if (value.length === 0) return '[]';
+          return '[' + value.length + ' items]';
+        } else {
+          const keys = Object.keys(value);
+          if (keys.length === 0) return '{}';
+          // Show first few key-value pairs
+          const preview = keys.slice(0, 2).map(k => k + ': ' + value[k]).join(', ');
+          return keys.length > 2 ? preview + '...' : preview;
+        }
+      }
+
+      return String(value);
+    }
+
+    // Display properties in table
+    function displayProperties(properties) {
+      currentProperties = properties;
+      const tbody = document.getElementById('properties-table');
+      tbody.innerHTML = '';
+
+      for (const [key, value] of Object.entries(properties)) {
+        const tr = document.createElement('tr');
+
+        const tdCheckbox = document.createElement('td');
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = getPreference(key);
+        checkbox.dataset.property = key;
+
+        // Set initial unchecked class if needed
+        if (!checkbox.checked) {
+          tr.classList.add('unchecked');
+        }
+
+        checkbox.addEventListener('change', (e) => {
+          setPreference(key, e.target.checked);
+          // Toggle unchecked class
+          if (e.target.checked) {
+            tr.classList.remove('unchecked');
+          } else {
+            tr.classList.add('unchecked');
+          }
+        });
+        tdCheckbox.appendChild(checkbox);
+
+        const tdName = document.createElement('td');
+        const spanName = document.createElement('span');
+        spanName.className = 'property-name';
+        spanName.textContent = key;
+        tdName.appendChild(spanName);
+
+        const tdValue = document.createElement('td');
+        const spanValue = document.createElement('span');
+        spanValue.className = 'property-value';
+        const displayValue = formatValueForDisplay(value);
+        spanValue.textContent = displayValue;
+        spanValue.title = displayValue;
+        tdValue.appendChild(spanValue);
+
+        tr.appendChild(tdCheckbox);
+        tr.appendChild(tdName);
+        tr.appendChild(tdValue);
+        tbody.appendChild(tr);
+      }
+
+      document.getElementById('message').classList.add('hidden');
+      document.getElementById('content').classList.remove('hidden');
+    }
+
+    // Show toast notification
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = 'toast show ' + type;
+
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2500);
+    }
+
+    // Format value for human-readable output
+    function formatValue(value, indent = 0) {
+      const indentStr = '  '.repeat(indent);
+
+      // Try to parse JSON strings
+      if (typeof value === 'string' && (value.startsWith('{') || value.startsWith('['))) {
+        try {
+          value = JSON.parse(value);
+        } catch (e) {
+          // Not JSON, keep as string
+          return value;
+        }
+      }
+
+      // Handle arrays
+      if (Array.isArray(value)) {
+        if (value.length === 0) return '[]';
+
+        let result = '\n';
+        value.forEach((item, index) => {
+          if (typeof item === 'object' && item !== null) {
+            const props = [];
+            Object.entries(item).forEach(([key, val]) => {
+              // For nested objects/arrays in array items, stringify them
+              if (typeof val === 'object' && val !== null) {
+                props.push(key + ': ' + JSON.stringify(val));
+              } else {
+                props.push(key + ': ' + val);
+              }
+            });
+            result += '[' + index + '] ' + props.join(', ');
+            if (index < value.length - 1) result += ', ';
+          } else {
+            result += '[' + index + '] ' + item;
+            if (index < value.length - 1) result += ', ';
+          }
+        });
+        return result;
+      }
+
+      // Handle objects
+      if (typeof value === 'object' && value !== null) {
+        const props = [];
+        Object.entries(value).forEach(([key, val]) => {
+          // For nested objects/arrays in object values, stringify them
+          if (typeof val === 'object' && val !== null) {
+            props.push(key + ': ' + JSON.stringify(val));
+          } else {
+            props.push(key + ': ' + val);
+          }
+        });
+        return '\n' + props.join(', ');
+      }
+
+      // Simple values
+      return value;
+    }
+
+    // Convert properties to human-readable format
+    function formatPropertiesForCopy(properties) {
+      let output = '';
+
+      Object.entries(properties).forEach(([key, value]) => {
+        const formattedValue = formatValue(value);
+
+        if (typeof formattedValue === 'string' && formattedValue.includes('\n')) {
+          // Multi-line value (nested)
+          output += key + ':' + formattedValue + '\n';
+        } else {
+          // Single-line value
+          output += key + ': ' + formattedValue + '\n';
+        }
+      });
+
+      return output.trimEnd();
+    }
+
+    // Fallback copy method using textarea
+    function fallbackCopyTextToClipboard(text) {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.top = '-9999px';
+      textArea.style.left = '-9999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+
+      try {
+        const successful = document.execCommand('copy');
+        document.body.removeChild(textArea);
+        return successful;
+      } catch (err) {
+        document.body.removeChild(textArea);
+        return false;
+      }
+    }
+
+    // Copy selected properties to clipboard
+    function copySelectedProperties() {
+      console.log('Copy button clicked');
+
+      const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+      const selectedProps = {};
+
+      checkboxes.forEach(checkbox => {
+        const propName = checkbox.dataset.property;
+        selectedProps[propName] = currentProperties[propName];
+      });
+
+      console.log('Selected properties:', selectedProps);
+
+      if (Object.keys(selectedProps).length === 0) {
+        showToast('Please select at least one property', 'error');
+        return;
+      }
+
+      const textToCopy = formatPropertiesForCopy(selectedProps);
+      console.log('Text to copy:', textToCopy);
+
+      // Try modern clipboard API first
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(textToCopy)
+          .then(() => {
+            console.log('Copied successfully using clipboard API');
+            showToast('Copied to clipboard!', 'success');
+          })
+          .catch(err => {
+            console.error('Clipboard API failed:', err);
+            // Fallback to execCommand
+            const success = fallbackCopyTextToClipboard(textToCopy);
+            if (success) {
+              console.log('Copied successfully using fallback method');
+              showToast('Copied to clipboard!', 'success');
+            } else {
+              console.error('Fallback copy also failed');
+              showToast('Failed to copy to clipboard', 'error');
+            }
+          });
+      } else {
+        // Use fallback directly if clipboard API not available
+        console.log('Clipboard API not available, using fallback');
+        const success = fallbackCopyTextToClipboard(textToCopy);
+        if (success) {
+          console.log('Copied successfully using fallback method');
+          showToast('Copied to clipboard!', 'success');
+        } else {
+          console.error('Fallback copy failed');
+          showToast('Failed to copy to clipboard', 'error');
+        }
+      }
+    }
+
+    // Select all checkboxes
+    function selectAll() {
+      const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(checkbox => {
+        checkbox.checked = true;
+        setPreference(checkbox.dataset.property, true);
+        // Remove unchecked class from row
+        const row = checkbox.closest('tr');
+        if (row) row.classList.remove('unchecked');
+      });
+    }
+
+    // Deselect all checkboxes
+    function deselectAll() {
+      const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(checkbox => {
+        checkbox.checked = false;
+        setPreference(checkbox.dataset.property, false);
+        // Add unchecked class to row
+        const row = checkbox.closest('tr');
+        if (row) row.classList.add('unchecked');
+      });
+    }
+
+    // Event listeners
+    document.getElementById('copy-btn').addEventListener('click', copySelectedProperties);
+    document.getElementById('select-all').addEventListener('click', selectAll);
+    document.getElementById('deselect-all').addEventListener('click', deselectAll);
+
+    // GitHub link handler
+    document.querySelector('.github-link').addEventListener('click', (e) => {
+      e.preventDefault();
+      window.open('https://github.com/p32929/figma_copy_props', '_blank');
+    });
+
+    // Listen for messages from plugin code
+    window.onmessage = (event) => {
+      const msg = event.data.pluginMessage;
+
+      if (msg.type === 'selection-changed') {
+        displayProperties(msg.properties);
+      } else if (msg.type === 'no-selection') {
+        document.getElementById('message').textContent = 'Select an element to view its properties';
+        document.getElementById('message').classList.remove('hidden');
+        document.getElementById('content').classList.add('hidden');
+      } else if (msg.type === 'multiple-selection') {
+        document.getElementById('message').textContent = `${msg.count} elements selected. Please select only one element.`;
+        document.getElementById('message').classList.remove('hidden');
+        document.getElementById('content').classList.add('hidden');
+      }
+    };
+
+    // Load preferences on startup
+    loadPreferences();
+  </script>
+</body>
+</html>
