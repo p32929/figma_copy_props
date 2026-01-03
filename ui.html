@@ -266,6 +266,9 @@
     let currentProperties = {};
     let preferences = {};
 
+    // Fields that should be unchecked by default
+    const defaultUnchecked = ['height', 'width', 'visible', 'locked', 'x', 'y', 'name'];
+
     // Load preferences from localStorage
     function loadPreferences() {
       try {
@@ -288,9 +291,31 @@
       }
     }
 
-    // Get checkbox state for a property (default to checked if not set)
-    function getPreference(propertyName) {
-      return preferences.hasOwnProperty(propertyName) ? preferences[propertyName] : true;
+    // Check if a value is empty (0, "", [], {}, "0px", "0%", etc.)
+    function isEmptyValue(value) {
+      if (value === 0) return true;
+      if (value === '') return true;
+      if (value === '[]') return true;
+      if (value === '{}') return true;
+      // Check for zero values like "0px", "0%", "0"
+      if (typeof value === 'string' && /^0(%|px)?$/.test(value)) return true;
+      return false;
+    }
+
+    // Get checkbox state for a property (default based on defaultUnchecked and value)
+    function getPreference(propertyName, value) {
+      if (preferences.hasOwnProperty(propertyName)) {
+        return preferences[propertyName];
+      }
+      // Uncheck if in defaultUnchecked list
+      if (defaultUnchecked.includes(propertyName)) {
+        return false;
+      }
+      // Uncheck if value is empty
+      if (isEmptyValue(value)) {
+        return false;
+      }
+      return true;
     }
 
     // Set checkbox state for a property
@@ -301,29 +326,7 @@
 
     // Format value for table display
     function formatValueForDisplay(value) {
-      // Try to parse JSON strings
-      if (typeof value === 'string' && (value.startsWith('{') || value.startsWith('['))) {
-        try {
-          value = JSON.parse(value);
-        } catch (e) {
-          return value;
-        }
-      }
-
-      // Handle objects and arrays - show compact representation
-      if (typeof value === 'object' && value !== null) {
-        if (Array.isArray(value)) {
-          if (value.length === 0) return '[]';
-          return '[' + value.length + ' items]';
-        } else {
-          const keys = Object.keys(value);
-          if (keys.length === 0) return '{}';
-          // Show first few key-value pairs
-          const preview = keys.slice(0, 2).map(k => k + ': ' + value[k]).join(', ');
-          return keys.length > 2 ? preview + '...' : preview;
-        }
-      }
-
+      // Values are now pre-formatted strings from code.ts, just return them
       return String(value);
     }
 
@@ -333,13 +336,21 @@
       const tbody = document.getElementById('properties-table');
       tbody.innerHTML = '';
 
-      for (const [key, value] of Object.entries(properties)) {
+      // Sort: checked items first, unchecked items last
+      const entries = Object.entries(properties).sort((a, b) => {
+        const aChecked = getPreference(a[0], a[1]);
+        const bChecked = getPreference(b[0], b[1]);
+        if (aChecked === bChecked) return 0;
+        return aChecked ? -1 : 1;
+      });
+
+      for (const [key, value] of entries) {
         const tr = document.createElement('tr');
 
         const tdCheckbox = document.createElement('td');
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
-        checkbox.checked = getPreference(key);
+        checkbox.checked = getPreference(key, value);
         checkbox.dataset.property = key;
 
         // Set initial unchecked class if needed
@@ -390,80 +401,12 @@
       }, 2500);
     }
 
-    // Format value for human-readable output
-    function formatValue(value, indent = 0) {
-      const indentStr = '  '.repeat(indent);
-
-      // Try to parse JSON strings
-      if (typeof value === 'string' && (value.startsWith('{') || value.startsWith('['))) {
-        try {
-          value = JSON.parse(value);
-        } catch (e) {
-          // Not JSON, keep as string
-          return value;
-        }
-      }
-
-      // Handle arrays
-      if (Array.isArray(value)) {
-        if (value.length === 0) return '[]';
-
-        let result = '\n';
-        value.forEach((item, index) => {
-          if (typeof item === 'object' && item !== null) {
-            const props = [];
-            Object.entries(item).forEach(([key, val]) => {
-              // For nested objects/arrays in array items, stringify them
-              if (typeof val === 'object' && val !== null) {
-                props.push(key + ': ' + JSON.stringify(val));
-              } else {
-                props.push(key + ': ' + val);
-              }
-            });
-            result += '[' + index + '] ' + props.join(', ');
-            if (index < value.length - 1) result += ', ';
-          } else {
-            result += '[' + index + '] ' + item;
-            if (index < value.length - 1) result += ', ';
-          }
-        });
-        return result;
-      }
-
-      // Handle objects
-      if (typeof value === 'object' && value !== null) {
-        const props = [];
-        Object.entries(value).forEach(([key, val]) => {
-          // For nested objects/arrays in object values, stringify them
-          if (typeof val === 'object' && val !== null) {
-            props.push(key + ': ' + JSON.stringify(val));
-          } else {
-            props.push(key + ': ' + val);
-          }
-        });
-        return '\n' + props.join(', ');
-      }
-
-      // Simple values
-      return value;
-    }
-
     // Convert properties to human-readable format
     function formatPropertiesForCopy(properties) {
       let output = '';
-
       Object.entries(properties).forEach(([key, value]) => {
-        const formattedValue = formatValue(value);
-
-        if (typeof formattedValue === 'string' && formattedValue.includes('\n')) {
-          // Multi-line value (nested)
-          output += key + ':' + formattedValue + '\n';
-        } else {
-          // Single-line value
-          output += key + ': ' + formattedValue + '\n';
-        }
+        output += key + ': ' + value + '\n';
       });
-
       return output.trimEnd();
     }
 
