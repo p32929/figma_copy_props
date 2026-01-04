@@ -47,6 +47,41 @@ function formatEffects(effects: readonly Effect[]): string[] {
   });
 }
 
+// Calculate distance between two nodes (center to center and edge distances)
+function calculateDistance(node1: SceneNode, node2: SceneNode): Record<string, any> {
+  const distance: Record<string, any> = {};
+
+  if ('x' in node1 && 'y' in node1 && 'width' in node1 && 'height' in node1 &&
+      'x' in node2 && 'y' in node2 && 'width' in node2 && 'height' in node2) {
+
+    // Center points
+    const center1X = node1.x + node1.width / 2;
+    const center1Y = node1.y + node1.height / 2;
+    const center2X = node2.x + node2.width / 2;
+    const center2Y = node2.y + node2.height / 2;
+
+    // Center to center distance
+    const dx = center2X - center1X;
+    const dy = center2Y - center1Y;
+    distance.horizontalDistance = Math.round(dx * 100) / 100;
+    distance.verticalDistance = Math.round(dy * 100) / 100;
+    distance.directDistance = Math.round(Math.sqrt(dx * dx + dy * dy) * 100) / 100;
+
+    // Edge to edge gaps (positive = gap, negative = overlap)
+    const horizontalGap = node1.x < node2.x
+      ? node2.x - (node1.x + node1.width)  // node2 is to the right
+      : node1.x - (node2.x + node2.width); // node1 is to the right
+    const verticalGap = node1.y < node2.y
+      ? node2.y - (node1.y + node1.height)  // node2 is below
+      : node1.y - (node2.y + node2.height); // node1 is below
+
+    distance.horizontalGap = Math.round(horizontalGap * 100) / 100;
+    distance.verticalGap = Math.round(verticalGap * 100) / 100;
+  }
+
+  return distance;
+}
+
 // Function to extract properties from a selected node
 function extractProperties(node: SceneNode): Record<string, any> {
   const properties: Record<string, any> = {
