@@ -1,63 +1,39 @@
-# CopyProps - Figma Property Copier
+# CopyProps: Figma property copier
 
-A Figma plugin that lets you tick exactly which properties of a selected element you want, and copies them out in a clean, readable format instead of raw JSON.
+CopyProps is a Figma plugin that copies the properties of a selected layer as clean, readable text. Figma's own "copy as" options give you CSS or code, and dev mode is not on every plan. CopyProps lets you tick exactly the properties you want and copies them in a simple `name: value` format you can paste into a ticket, a chat or your code.
 
-**Install from the Figma Community:** https://www.figma.com/community/plugin/1584270032926854878/copyprops
+**Install it from the Figma Community:** https://www.figma.com/community/plugin/1584270032926854878/copyprops
 
-![Screenshot](https://res.cloudinary.com/p32929/image/upload/v1766252551/figma_copy_props/Screenshot_2025-12-20_at_9.23.31_PM_syrwmp.png)
+![CopyProps](https://res.cloudinary.com/p32929/image/upload/v1766252551/figma_copy_props/Screenshot_2025-12-20_at_9.23.31_PM_syrwmp.png)
 
 ## Features
 
-- **Automatic Property Extraction**: Instantly view all properties of any selected Figma element
-- **Selective Copying**: Use checkboxes to choose which properties to copy
-- **Persistent Preferences**: Your checkbox selections are remembered across sessions
-- **Visual Feedback**: Unchecked properties are visually indicated with strikethrough and fade effect
-- **Clean Output Format**: Properties are copied in a human-readable format, not JSON
-- **Nested Object Support**: Complex properties (fills, strokes, effects) are formatted as single-line, comma-separated values
-- **Scrollable Table**: Smooth scrolling for long property lists while keeping controls fixed
-- **GitHub Integration**: Quick access to the repository directly from the plugin UI
+1. **Every property at a glance:** select a layer and all its properties show in one table.
+2. **Copy only what you need:** tick or untick each property, or use Select all and Deselect all.
+3. **Remembers your choice:** the ticks you set stay the same next time you open the plugin.
+4. **Easy to read:** unticked properties are faded and struck through, so you see what will be copied.
+5. **Clean output, not JSON:** simple properties come out as `name: value`, and fills, strokes and effects come out on one line each.
 
-## Installation
+## Install
 
-Easiest: install it from the [Figma Community page](https://www.figma.com/community/plugin/1584270032926854878/copyprops) — no build step.
+The easiest way is the [Figma Community page](https://www.figma.com/community/plugin/1584270032926854878/copyprops). There is nothing to build.
 
-To run it from source instead:
+To run it from the source code, you need [Node.js](https://nodejs.org/):
 
-### Prerequisites
+1. Clone this repository.
+2. Run `npm install`.
+3. Run `npm run build`.
+4. In Figma, open **Plugins**, then **Development**, then **Import plugin from manifest**, and pick `manifest.json` from this folder.
+5. Run it from **Plugins**, then **Development**, then **CopyProps**.
 
-First, download Node.js which comes with NPM:
-- https://nodejs.org/en/download/
+## How to use it
 
-### Setup
+1. Select a layer in Figma.
+2. Tick the properties you want to copy.
+3. Click **Copy Selected Properties**. A small message tells you it worked.
 
-1. Clone or download this repository
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Build the plugin:
-   ```bash
-   npm run build
-   ```
-4. In Figma, go to `Plugins → Development → Import plugin from manifest`
-5. Select the `manifest.json` file from this directory
-6. Run the plugin from `Plugins → Development → CopyProps`
+Simple properties look like this:
 
-## Usage
-
-1. **Select an element** in Figma
-2. The plugin will display all properties in a scrollable table with checkboxes
-3. **Check/uncheck** properties you want to include or exclude
-   - Unchecked properties appear with strikethrough and faded out
-   - Use "Select All" or "Deselect All" for quick toggling
-4. Click **"Copy Selected Properties"** to copy to clipboard
-   - A success toast notification will appear
-5. Your checkbox preferences are automatically saved and will persist across sessions
-6. Click the **GitHub icon** in the header to visit the repository
-
-### Output Format
-
-Simple properties:
 ```
 name: Rectangle 1
 width: 100
@@ -65,95 +41,34 @@ height: 50
 opacity: 1
 ```
 
-Nested properties (arrays):
+Lists and objects stay on one line each:
+
 ```
 fills:
 [0] type: SOLID, color: {"r":1,"g":0.5,"b":0}, opacity: 1
-```
 
-Nested properties (objects):
-```
 letterSpacing:
 unit: PERCENT, value: 25
 ```
 
-## Development
+## For developers
 
-### Build
-```bash
-npm run build
-```
-
-### Watch mode (auto-rebuild on changes)
-```bash
-npm run watch
-```
-
-### Lint
-```bash
-npm run lint
-```
-
-## Technology Stack
-
-- TypeScript
-- Figma Plugin API
-- HTML/CSS/JavaScript (UI)
-- localStorage (for persistent preferences)
-
-## How It Works
-
-- **code.ts**: Main plugin code that runs in Figma's context. Listens for selection changes and extracts properties from selected elements.
-- **ui.html**: Plugin UI that displays properties in a table with checkboxes, handles copying to clipboard, and manages user preferences.
-- **manifest.json**: Plugin configuration file.
-
-## Repository
-
-https://github.com/p32929/figma_copy_props
+1. `npm run watch` rebuilds on every change.
+2. `npm run lint` checks the code.
+3. `code.ts` runs inside Figma and reads the selected layer. `ui.html` is the table, the copy button and the saved ticks.
 
 ## License
 
-MIT License — Copyright (c) 2025 Fayaz Bin Salam. See [LICENSE](LICENSE) for the full text.
+MIT License. Copyright (c) 2025 Fayaz Bin Salam. See [LICENSE](LICENSE) for the full text.
 
 ## Contributing
 
-Contributions are warmly welcomed and greatly appreciated! Whether it's a bug fix, new feature, or improvement, your input helps make this project better for everyone.
-
-Before submitting a pull request, please:
-
-1. Create an issue describing the feature or bug fix you'd like to work on
-2. Wait for discussion and approval to ensure alignment with project goals
-3. Fork the repository and create your feature branch
-4. Submit your pull request with a clear description of changes
-
-This approach helps avoid duplicate efforts and ensures smooth collaboration. Thank you for considering contributing!
+Contributions are very welcome. Please open an issue first to talk about what you'd like to add or change, so we can agree on it before you spend time on a pull request. Thank you!
 
 ## Share
 
-Sharing this repository with your friends is just one click away from here
+<a href="https://p32929.github.io/share/?repo=figma_copy_props"><img src="https://p32929.github.io/readme/share.svg" alt="Share this with your friends in just a click" width="420"></a>
 
-[![facebook](https://user-images.githubusercontent.com/6418354/179013321-ac1d1452-0689-493f-9066-940cf2302b6e.png)](https://www.facebook.com/sharer/sharer.php?u=https://github.com/p32929/figma_copy_props/)
-[![twitter](https://user-images.githubusercontent.com/6418354/179013351-7d8d6d1c-4ce2-46ab-bef8-4c4765a1b888.png)](https://twitter.com/intent/tweet?url=https://github.com/p32929/figma_copy_props/)
-[![tumblr](https://user-images.githubusercontent.com/6418354/179013343-3111f55a-3b90-40c7-8487-9777348672b0.png)](https://www.tumblr.com/share?v=3&u=https://github.com/p32929/figma_copy_props/)
-[![pocket](https://user-images.githubusercontent.com/6418354/179013334-b095c45f-becf-49f4-9ee1-5a731a9b1f85.png)](https://getpocket.com/save?url=https://github.com/p32929/figma_copy_props/)
-[![pinterest](https://user-images.githubusercontent.com/6418354/179013331-44cd9206-11b1-4b65-becb-5863b61c828f.png)](https://pinterest.com/pin/create/button/?url=https://github.com/p32929/figma_copy_props/)
-[![reddit](https://user-images.githubusercontent.com/6418354/179013338-7416ae3f-73ba-4522-86e1-1374d7082d22.png)](https://www.reddit.com/submit?url=https://github.com/p32929/figma_copy_props/)
-[![linkedin](https://user-images.githubusercontent.com/6418354/179013327-ca7b7102-1da8-4b1c-858f-1a6e5f21bd70.png)](https://www.linkedin.com/shareArticle?mini=true&url=https://github.com/p32929/figma_copy_props/)
-[![whatsapp](https://user-images.githubusercontent.com/6418354/179013353-f477fa0b-3e6f-4138-a357-c9991b23ff88.png)](https://api.whatsapp.com/send?text=https://github.com/p32929/figma_copy_props/)
+## Support
 
-<!-- hire-block -->
-
----
-
-## 💼 Using this at a company?
-
-I do fixed-price delivery work on my own projects. One invoice, one date, no hourly billing:
-
-| | |
-|---|---|
-| **White-label build** — this project rebranded, extended and deployed as yours | **$6,500** · 3 weeks |
-| **Custom app from scratch** on my own stack, signed and auto-updating | **$12,500** · 6 weeks |
-| **Production-hardening sprint** — 72 hours on this project, for your load and your security review | **$999** |
-| **Ongoing capacity** — one project-week of my time reserved every month | **$9,000 / month** |
-
-Full details → **[p32929.github.io/hire](https://p32929.github.io/hire/)** · Email **[fayazdevinbox@uberip.com](mailto:fayazdevinbox@uberip.com)** — scoping and quotes are free and I answer within one business day.
+<a href="https://p32929.github.io/support/"><img src="https://p32929.github.io/readme/support.svg" alt="If you like my works and want to support me, feel free to support" width="420"></a>
